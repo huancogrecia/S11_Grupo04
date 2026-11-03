@@ -11,8 +11,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,6 +26,44 @@ class VisitServiceTest {
 
     @InjectMocks
     private VisitServiceImpl visitService;
+
+    @Test
+    void testCreateVisit() {
+        Visit visit = new Visit(null, 1, 2, LocalDate.of(2026, 11, 3),
+                "Control general", new BigDecimal("45.00"));
+        Visit savedVisit = new Visit(10, 1, 2, LocalDate.of(2026, 11, 3),
+                "Control general", new BigDecimal("45.00"));
+        when(visitRepository.save(visit)).thenReturn(savedVisit);
+
+        Visit result = visitService.create(visit);
+
+        assertNotNull(result.getId());
+        assertEquals(savedVisit, result);
+        verify(visitRepository).save(visit);
+    }
+
+    @Test
+    void testUpdateVisit() {
+        Visit updatedVisit = new Visit(10, 1, 2, LocalDate.of(2026, 11, 4),
+                "Control y tratamiento", new BigDecimal("60.00"));
+        when(visitRepository.save(updatedVisit)).thenReturn(updatedVisit);
+
+        Visit result = visitService.update(updatedVisit);
+
+        assertEquals(updatedVisit, result);
+        verify(visitRepository).save(updatedVisit);
+    }
+
+    @Test
+    void testFindVisitById() {
+        Visit expectedVisit = visit(10, 1, 2, "Control general");
+        when(visitRepository.findById(10)).thenReturn(Optional.of(expectedVisit));
+
+        Optional<Visit> result = visitService.findById(10);
+
+        assertEquals(Optional.of(expectedVisit), result);
+        verify(visitRepository).findById(10);
+    }
 
     @Test
     void testFindByPetId() {
